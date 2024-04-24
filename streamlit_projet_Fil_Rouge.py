@@ -4,11 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df=pd.read_csv("vgsales_cleaned_1.csv")
+df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
 
 st.title("Projet fil rouge")
 st.sidebar.title("Sommaire")
-pages=["Exploration", "DataVizualization", "Modélisation"]
+pages=["Exploration", "DataVisualization", "Modélisation"]
 page=st.sidebar.radio("Aller vers", pages)
 
 if page == pages[0] : 
@@ -21,20 +21,63 @@ if page == pages[0] :
         st.dataframe(df.isna().sum())
 
 if page == pages[1] : 
-    st.write("### DataVizualization")
+    st.write("### DataVisualization")
 
+    
+    release_year = df['Year'].value_counts()
+    x_values = release_year.values
     fig = plt.figure()
-    sns.countplot(x = 'Estimated_Sales', data = df)
+    sns.lineplot(data = release_year)
+    plt.xlabel("Years")
+    plt.ylabel("Estimated_Sales")
     st.pyplot(fig)
 
+    df_Estimated_Sales = df.groupby(['Year']).agg({'Estimated_Sales': 'sum'})
+
+
+    
+    
+    # Line plot for different sales categories over time
     fig = plt.figure()
-    sns.countplot(x = 'Year', data = df)
-    plt.title("Estimation des ventes de jeux de donnés entre 1985 et 2016")
+    sns.lineplot(data=df, x='Year', y='Genre', hue='Genre', palette='tab10')
+    plt.xlabel('Year')
+    plt.ylabel('Ventes (en millions)')
     st.pyplot(fig)
 
+
+
     fig = plt.figure()
-    sns.countplot(x = 'Estimated_Sales', hue='Year', data = df)
+    df_platform2=df["Platform"].value_counts().head(20)
+    sns.barplot(y=df_platform2.index, x=df_platform2.values);
     st.pyplot(fig)
+
+    global_sales2 = df.groupby(['Publisher']).agg({'Estimated_Sales': 'sum'})
+    global_games2 = df.groupby(['Publisher']).agg({'Name': 'count'})
+    global_sales2 = global_sales2.join(global_games2).sort_values(
+    by='Estimated_Sales', ascending=False).head(15)
+
+    global_sales2["Estimated_Sales"].sort_values(ascending=False).head(10)
+
+    fig = plt.figure()
+    plt.pie(global_sales2.head(10).Estimated_Sales, labels=["Nintendo", "Activision", "Electronic Arts", "Sony", "EA Sports", "Ubisoft", "THQ", "Sega", "Rockstar Games", "Capcom"],
+       colors=["#6c5f32","#f9f4ce","#9fc184","#97c8d9","pink","#432f0f","#a5a202","#0f68b8","#f7e560"], explode=[0.1,0.1,0.1,0,0,0,0,0,0,0],
+        autopct=lambda x:round(x,2).astype(str)+"%", pctdistance=0.7, labeldistance=1.1)
+    plt.title=('Répartition des ventes globales par publisher')
+    plt.legend(bbox_to_anchor=(1.1,1), loc="upper left")
+    plt.show()
+    st.pyplot(fig)
+
+    global_sales2.Name.sort_values(ascending=False).head(10)
+
+    fig = plt.figure()
+    plt.pie(global_sales2.Name.sort_values(ascending=False).head(10), labels=["Activision", "Ubisoft", "EA", "Konami", "Nintendo", "THQ", "Sega", "Sony", "EA Sports", "Capcom"],
+       colors=["#74e0aa","#bee893","#fbfeb2","#dbbf9e","#c4d9a9","#ddd8c4","#c5a5b8","#cccccc","#bdb3a6","#7c908a"], explode=[0.1,0.1,0.1,0,0,0,0,0,0,0],
+        autopct=lambda x:round(x,2).astype(str)+"%", pctdistance=0.7, labeldistance=1.1)
+    plt.title=('Répartition du nombre de jeux par éditeurs')
+    plt.legend(bbox_to_anchor=(1,1.1), loc="upper left")
+    plt.show()
+    st.pyplot(fig)
+
 
     #fig = sns.catplot(x='Pclass', y='Survived', data=df, kind='point')
     #st.pyplot(fig)
