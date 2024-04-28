@@ -135,7 +135,8 @@ if page == pages[2] :
 
         # Chargement du jeu de test
         if Xtest_button_status == True:
-            X_test = pd.read_csv("vgsales_RandomForestReg_Xtest.csv", index_col = 0)
+            X_test = joblib.load("vgsales_RandomForestReg_Xtest.joblib")
+            # X_test = pd.read_csv("vgsales_RandomForestReg_Xtest.csv", index_col = 0)
             y_test = pd.read_csv("vgsales_RandomForestReg_Ytest.csv", index_col = 0)
             X_test_decoded = pd.read_csv("vgsales_RandomForestReg_XtestDecoded.csv", index_col = 0)
             st.write('### Présentation du jeu de test')
