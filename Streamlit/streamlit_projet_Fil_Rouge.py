@@ -1,0 +1,212 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import joblib
+from sklearn.ensemble import RandomForestRegressor
+
+df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
+
+st.title("Projet fil rouge")
+st.sidebar.title("Sommaire")
+pages=["Exploration", "DataVisualization", "Modélisation"]
+page=st.sidebar.radio("Aller vers", pages)
+
+if page == pages[0] : 
+    st.write("### Introduction")
+    st.dataframe(df.head(10))
+    st.write(df.shape)
+    st.dataframe(df.describe())
+
+    if st.checkbox("Afficher les NA") :
+        st.dataframe(df.isna().sum())
+
+if page == pages[1] : 
+    st.write("### DataVisualization")
+
+    
+    release_year = df['Year'].value_counts()
+    x_values = release_year.values
+    fig = plt.figure()
+    sns.lineplot(data = release_year)
+    plt.xlabel("Years")
+    plt.ylabel("Estimated_Sales")
+    st.pyplot(fig)
+
+    df_Estimated_Sales = df.groupby(['Year']).agg({'Estimated_Sales': 'sum'})
+
+
+    
+    
+    # Line plot for different sales categories over time
+    fig = plt.figure()
+    sns.lineplot(data=df, x='Year', y='Genre', hue='Genre', palette='tab10')
+    plt.xlabel('Year')
+    plt.ylabel('Ventes (en millions)')
+    st.pyplot(fig)
+
+
+
+    fig = plt.figure()
+    df_platform2=df["Platform"].value_counts().head(20)
+    sns.barplot(y=df_platform2.index, x=df_platform2.values);
+    st.pyplot(fig)
+
+    global_sales2 = df.groupby(['Publisher']).agg({'Estimated_Sales': 'sum'})
+    global_games2 = df.groupby(['Publisher']).agg({'Name': 'count'})
+    global_sales2 = global_sales2.join(global_games2).sort_values(
+    by='Estimated_Sales', ascending=False).head(15)
+
+    global_sales2["Estimated_Sales"].sort_values(ascending=False).head(10)
+
+    fig = plt.figure()
+    plt.pie(global_sales2.head(10).Estimated_Sales, labels=["Nintendo", "Activision", "Electronic Arts", "Sony", "EA Sports", "Ubisoft", "THQ", "Sega", "Rockstar Games", "Capcom"],
+       colors=["#6c5f32","#f9f4ce","#9fc184","#97c8d9","pink","#432f0f","#a5a202","#0f68b8","#f7e560"], explode=[0.1,0.1,0.1,0,0,0,0,0,0,0],
+        autopct=lambda x:round(x,2).astype(str)+"%", pctdistance=0.7, labeldistance=1.1)
+    plt.title=('Répartition des ventes globales par publisher')
+    plt.legend(bbox_to_anchor=(1.1,1), loc="upper left")
+    plt.show()
+    st.pyplot(fig)
+
+    global_sales2.Name.sort_values(ascending=False).head(10)
+
+    fig = plt.figure()
+    plt.pie(global_sales2.Name.sort_values(ascending=False).head(10), labels=["Activision", "Ubisoft", "EA", "Konami", "Nintendo", "THQ", "Sega", "Sony", "EA Sports", "Capcom"],
+       colors=["#74e0aa","#bee893","#fbfeb2","#dbbf9e","#c4d9a9","#ddd8c4","#c5a5b8","#cccccc","#bdb3a6","#7c908a"], explode=[0.1,0.1,0.1,0,0,0,0,0,0,0],
+        autopct=lambda x:round(x,2).astype(str)+"%", pctdistance=0.7, labeldistance=1.1)
+    plt.title=('Répartition du nombre de jeux par éditeurs')
+    plt.legend(bbox_to_anchor=(1,1.1), loc="upper left")
+    plt.show()
+    st.pyplot(fig)
+
+
+    #fig = sns.catplot(x='Pclass', y='Survived', data=df, kind='point')
+    #st.pyplot(fig)
+
+    #fig = sns.lmplot(x='Age', y='Survived', hue="Pclass", data=df)
+    #st.pyplot(fig)
+
+if page == pages[2] : 
+    st.write("### Modélisation")
+
+    # Liste déroulante
+    no_model = "Sélectionnez un modèle"
+    model_1 = "Random Forest Regressor - Max Depth 2"
+    model_2 = "Random Forest Regressor - Max Depth 4"
+    model_3 = "Random Forest Regressor - No Max Depth"
+    model_options = [no_model, model_1, model_2, model_3]
+    selected_model = st.selectbox('Selection du modèle:', model_options)
+    
+    # Si sélection d'un modèle
+    if selected_model != no_model:
+        
+        # Variables
+        if selected_model == model_1:
+            model_type = "Random Forest Regressor"
+            model_depth = "2"
+            model_loaded = joblib.load("vgsales_RandomForestReg_MaxDepth2.joblib")
+        if selected_model == model_2:
+            model_type = "Random Forest Regressor"
+            model_depth = "4"
+            model_loaded = joblib.load("vgsales_RandomForestReg_MaxDepth4.joblib")
+        if selected_model == model_3:
+            model_type = "Random Forest Regressor"
+            model_depth = "Max"
+            model_loaded = joblib.load("vgsales_RandomForestReg_NoMaxDepth.joblib")
+        
+        # Présentation du Modèle
+        st.write('### Présentation du modèle')
+        st.write('Type de Modèle:', model_type)
+        st.write('Profondeur:', model_depth)
+        
+        # Checkbox
+        st.write("### Options:")
+        FeatImp_button_status = st.checkbox("Afficher Feature Importances")
+        Xtest_button_status = st.checkbox("Charger un jeu de test et faire une prédiction")
+        PersPred_button_status = st.checkbox("Faire une prédiction personnalisée")
+
+        # Feature Importances Matrix
+        if FeatImp_button_status == True:
+            st.write('### Feature Importances Matrix')
+            X_train_columns = joblib.load("X_train_columns.joblib")
+            feature_importances = pd.DataFrame({'Variable' : X_train_columns, 'Importance' : model_loaded.feature_importances_}).sort_values('Importance', ascending = False)
+            st.dataframe(feature_importances[feature_importances['Importance'] > 0.02])
+
+        # Chargement du jeu de test
+        if Xtest_button_status == True:
+            X_test = pd.read_csv("vgsales_RandomForestReg_Xtest.csv", index_col = 0)
+            y_test = pd.read_csv("vgsales_RandomForestReg_Ytest.csv", index_col = 0)
+            X_test_decoded = pd.read_csv("vgsales_RandomForestReg_XtestDecoded.csv", index_col = 0)
+            st.write('### Présentation du jeu de test')
+            st.write('Nombre de jeux listés:', X_test.shape[0])
+            st.write("Extrait du jeu de données encodé:")
+            st.dataframe(X_test.head(5))
+
+            # Prédiction sur jeu de test
+            pred_button_status = st.button("Faire une prédiction")
+            
+            if pred_button_status == True:
+                st.write("Score de précision:", model_loaded.score(X_test, y_test))
+                y_pred = model_loaded.predict(X_test)
+                X_test_decoded['Estimated Sales - Predicted'] = y_pred
+                X_test_decoded['Estimated Sales - Real'] = y_test.reset_index(drop = True)
+                X_test_decoded['Squared Error'] = (X_test_decoded["Estimated Sales - Predicted"] - X_test_decoded["Estimated Sales - Real"]) ** 2
+                
+                col21, col22 = st.columns(2)
+
+                with col21:
+                    st.write("##### Top 100 des prédictions")
+                    st.dataframe(X_test_decoded.nsmallest(100, 'Squared Error'))
+
+                with col22:
+                    st.write("##### Flop 100 des prédictions")
+                    st.dataframe(X_test_decoded.nlargest(100, 'Squared Error'))
+
+        # Faire une prédiction personnalisée
+        if PersPred_button_status == True:
+
+            # Définition des valeurs
+            franchise_options = joblib.load("franchise_options.joblib")
+            genre_options = joblib.load("genre_options.joblib")
+            platform_options = joblib.load("platform_options.joblib")
+            publisher_options = joblib.load("publisher_options.joblib")
+            developer_options = joblib.load("developer_options.joblib")
+            year_options = [year for year in range(1970, 2019)]
+
+            input_franchise = st.selectbox("Franchise", franchise_options)
+            input_genre = st.selectbox("Genre", genre_options)
+            input_platform = st.selectbox("Platform", platform_options)
+            input_publisher = st.selectbox("Publisher", publisher_options)
+            input_developer = st.selectbox("Developer", developer_options)
+            input_year = st.select_slider("Release Year", year_options)
+
+            # Faire une prédiction
+            perspred_button_status = st.button("Faire une prédiction")
+
+            if perspred_button_status == True:
+                vgsales_perso = pd.DataFrame({'Franchise' : [input_franchise],
+                                              'Genre' : [input_genre],
+                                              'Platform' : [input_platform],
+                                              'Publisher' : [input_publisher],
+                                              'Developer' : [input_developer],
+                                              'Year' : [input_year]})
+                
+                # Encodage
+                vgsales_perso_ohe = vgsales_perso[['Franchise', 'Genre', 'Platform', 'Publisher', 'Developer']]
+                vgsales_perso_sc = np.asarray(vgsales_perso['Year']).reshape(-1,1)
+
+                ohe = joblib.load("FitOneHotEncoder.joblib")
+                sc = joblib.load("FitStandardScaler.joblib")
+
+                st.write("##### Résumé")
+                st.dataframe(vgsales_perso_ohe)
+                vgsales_perso_sc = pd.DataFrame(sc.transform(vgsales_perso_sc), columns = ['Year'])
+                vgsales_perso_ohe = pd.DataFrame(ohe.transform(vgsales_perso_ohe).toarray(), columns = ohe.get_feature_names_out())
+
+                vgsales_perso_encoded = pd.concat([vgsales_perso_ohe, vgsales_perso_sc], ignore_index = False, axis = 1)
+
+                # Prédiction
+                y_perso_pred = int(np.round(model_loaded.predict(vgsales_perso_encoded) * 1000000)[0])
+                y_perso_pred = "{:,.0f}".format(y_perso_pred)
+                st.metric("Predicted Sales in 2019", y_perso_pred)
