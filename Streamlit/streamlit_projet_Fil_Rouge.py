@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-from sklearn.ensemble import RandomForestRegressor
 
 df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
 
