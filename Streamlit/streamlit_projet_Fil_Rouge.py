@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+import os
+
+os.chdir("Streamlit")
 
 df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
 
