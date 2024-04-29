@@ -8,7 +8,12 @@ from sklearn.ensemble import RandomForestRegressor
 
 df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
 
-st.title("Projet fil rouge")
+st.title("Projet Data Analyse : Jeux Vidéo")
+st.write("L’équipe de DataScientest nous a dirigé vers un jeu de données disponible sur Kaggle, issu d'un scrap du site vgchartz.com. Le site répertorie les ventes totales de jeux-vidéos pour toutes les principales plateformes, allant des années 70 à aujourd’hui. Le site fournit également des variables additionnelles pour chaque jeu, tel que l’éditeur, le développeur ou bien encore le genre.")
+st.write("Le jeu de données en question était toutefois quelque peu limité. Le document ayant été créé en 2016, il ne pouvait pas inclure les ventes de jeux sortis plus récemment. La variable développeur manquait également au jeu de données. Nous avons donc fait un travail de recherche supplémentaire pour trouver un scrap plus complet.") 
+st.write("Nous avons jugé pertinent d’identifier la franchise à laquelle appartiennent les jeux de notre dataset. La franchise en elle-même est un argument marketing de poids et contribue grandement à la communication autour d’un jeu par les éditeurs. Grâce à cette méthode, nous avons ajouté la variable “Franchise” à notre jeu de données qui prend le nom de la franchise, si reconnue.")
+st.write("Finalement, afin de mieux comprendre les variables importantes de notre dataset, nous avons ajouté une colonne aléatoire contenant des chiffres random.")
+
 st.sidebar.title("Sommaire")
 pages=["Exploration", "DataVisualization", "Modélisation"]
 page=st.sidebar.radio("Aller vers", pages)
