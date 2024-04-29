@@ -4,14 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-import os
+import urllib
 
-os.chdir("Streamlit")
+urllib.request.urlretrieve('https://assets-datascientest.s3.eu-west-1.amazonaws.com/vgsales_RandomForestReg_NoMaxDepth.joblib', 'Streamlit/vgsales_RandomForestReg_NoMaxDepth.joblib')
 
-df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
+df = pd.read_csv("Streamlit/vgsales_cleaned_franchise_random.csv")
 
 st.title("Projet Data Analyse : Jeux Vidéo")
-st.image("streamlit_image_jeu_video.jpeg")
+st.image("Streamlit/streamlit_image_jeu_video.jpeg")
 st.write("L’industrie du jeu vidéo est une manne importante, riche en données à exploiter et où la concurrence est forte. Notre ambition à travers ce projet est de proposer une analyse des données du secteur, de reconnaître des corrélations et des disparités entre éditeurs, plateformes, distributeurs et de pouvoir élaborer un algorithme de machine-learning pouvant prédire le nombre de ventes d’un jeu vidéo.")
 st.write("Les principaux objectifs de ce projet sont:")
 st.write("1.	Exploration, visualisation et pre-processing  du jeu de données")
@@ -124,15 +124,15 @@ if page == pages[2] :
         if selected_model == model_1:
             model_type = "Random Forest Regressor"
             model_depth = "2"
-            model_loaded = joblib.load("vgsales_RandomForestReg_MaxDepth2.joblib")
+            model_loaded = joblib.load("Streamlit/vgsales_RandomForestReg_MaxDepth2.joblib")
         if selected_model == model_2:
             model_type = "Random Forest Regressor"
             model_depth = "4"
-            model_loaded = joblib.load("vgsales_RandomForestReg_MaxDepth4.joblib")
+            model_loaded = joblib.load("Streamlit/vgsales_RandomForestReg_MaxDepth4.joblib")
         if selected_model == model_3:
             model_type = "Random Forest Regressor"
             model_depth = "Max"
-            model_loaded = joblib.load("vgsales_RandomForestReg_NoMaxDepth.joblib")
+            model_loaded = joblib.load("Streamlit/vgsales_RandomForestReg_NoMaxDepth.joblib")
         
         # Présentation du Modèle
         st.write('### Présentation du modèle')
@@ -148,16 +148,16 @@ if page == pages[2] :
         # Feature Importances Matrix
         if FeatImp_button_status == True:
             st.write('### Feature Importances Matrix')
-            X_train_columns = joblib.load("X_train_columns.joblib")
+            X_train_columns = joblib.load("Streamlit/X_train_columns.joblib")
             feature_importances = pd.DataFrame({'Variable' : X_train_columns, 'Importance' : model_loaded.feature_importances_}).sort_values('Importance', ascending = False)
             st.dataframe(feature_importances[feature_importances['Importance'] > 0.02])
 
         # Chargement du jeu de test
         if Xtest_button_status == True:
-            X_test = joblib.load("vgsales_RandomForestReg_Xtest.joblib")
-            # X_test = pd.read_csv("vgsales_RandomForestReg_Xtest.csv", index_col = 0)
-            y_test = pd.read_csv("vgsales_RandomForestReg_Ytest.csv", index_col = 0)
-            X_test_decoded = pd.read_csv("vgsales_RandomForestReg_XtestDecoded.csv", index_col = 0)
+            X_test = joblib.load("Streamlit/vgsales_RandomForestReg_Xtest.joblib")
+            # X_test = pd.read_csv("Streamlit/vgsales_RandomForestReg_Xtest.csv", index_col = 0)
+            y_test = pd.read_csv("Streamlit/vgsales_RandomForestReg_Ytest.csv", index_col = 0)
+            X_test_decoded = pd.read_csv("Streamlit/vgsales_RandomForestReg_XtestDecoded.csv", index_col = 0)
             st.write('### Présentation du jeu de test')
             st.write('Nombre de jeux listés:', X_test.shape[0])
             st.write("Extrait du jeu de données encodé:")
@@ -187,11 +187,11 @@ if page == pages[2] :
         if PersPred_button_status == True:
 
             # Définition des valeurs
-            franchise_options = joblib.load("franchise_options.joblib")
-            genre_options = joblib.load("genre_options.joblib")
-            platform_options = joblib.load("platform_options.joblib")
-            publisher_options = joblib.load("publisher_options.joblib")
-            developer_options = joblib.load("developer_options.joblib")
+            franchise_options = joblib.load("Streamlit/franchise_options.joblib")
+            genre_options = joblib.load("Streamlit/genre_options.joblib")
+            platform_options = joblib.load("Streamlit/platform_options.joblib")
+            publisher_options = joblib.load("Streamlit/publisher_options.joblib")
+            developer_options = joblib.load("Streamlit/developer_options.joblib")
             year_options = [year for year in range(1970, 2019)]
 
             input_franchise = st.selectbox("Franchise", franchise_options)
@@ -216,8 +216,8 @@ if page == pages[2] :
                 vgsales_perso_ohe = vgsales_perso[['Franchise', 'Genre', 'Platform', 'Publisher', 'Developer']]
                 vgsales_perso_sc = np.asarray(vgsales_perso['Year']).reshape(-1,1)
 
-                ohe = joblib.load("FitOneHotEncoder.joblib")
-                sc = joblib.load("FitStandardScaler.joblib")
+                ohe = joblib.load("Streamlit/FitOneHotEncoder.joblib")
+                sc = joblib.load("Streamlit/FitStandardScaler.joblib")
 
                 st.write("##### Résumé")
                 st.dataframe(vgsales_perso_ohe)
