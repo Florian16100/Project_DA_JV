@@ -9,17 +9,22 @@ from sklearn.ensemble import RandomForestRegressor
 df = pd.read_csv("vgsales_cleaned_franchise_random.csv")
 
 st.title("Projet Data Analyse : Jeux Vidéo")
-st.write("L’équipe de DataScientest nous a dirigé vers un jeu de données disponible sur Kaggle, issu d'un scrap du site vgchartz.com. Le site répertorie les ventes totales de jeux-vidéos pour toutes les principales plateformes, allant des années 70 à aujourd’hui. Le site fournit également des variables additionnelles pour chaque jeu, tel que l’éditeur, le développeur ou bien encore le genre.")
-st.write("Le jeu de données en question était toutefois quelque peu limité. Le document ayant été créé en 2016, il ne pouvait pas inclure les ventes de jeux sortis plus récemment. La variable développeur manquait également au jeu de données. Nous avons donc fait un travail de recherche supplémentaire pour trouver un scrap plus complet.") 
-st.write("Nous avons jugé pertinent d’identifier la franchise à laquelle appartiennent les jeux de notre dataset. La franchise en elle-même est un argument marketing de poids et contribue grandement à la communication autour d’un jeu par les éditeurs. Grâce à cette méthode, nous avons ajouté la variable “Franchise” à notre jeu de données qui prend le nom de la franchise, si reconnue.")
-st.write("Finalement, afin de mieux comprendre les variables importantes de notre dataset, nous avons ajouté une colonne aléatoire contenant des chiffres random.")
+st.image("streamlit_image_jeu_video.jpeg")
+st.write("L’industrie du jeu vidéo est une manne importante, riche en données à exploiter et où la concurrence est forte. Notre ambition à travers ce projet est de proposer une analyse des données du secteur, de reconnaître des corrélations et des disparités entre éditeurs, plateformes, distributeurs et de pouvoir élaborer un algorithme de machine-learning pouvant prédire le nombre de ventes d’un jeu vidéo.")
+st.write("Les principaux objectifs de ce projet sont:")
+st.write("1.	Exploration, visualisation et pre-processing  du jeu de données")
+st.write("2.	Entraînement et évaluation des modèles de machine-learning pour la prédiction du nombre de ventes")
 
 st.sidebar.title("Sommaire")
-pages=["Exploration", "DataVisualization", "Modélisation"]
+pages=["Exploration", "Data Visualisation", "Modélisation"]
 page=st.sidebar.radio("Aller vers", pages)
 
 if page == pages[0] : 
-    st.write("### Introduction")
+    st.write("### Exploration")
+    st.write("L’équipe de DataScientest nous a dirigé vers un jeu de données disponible sur Kaggle, issu d'un scrap du site vgchartz.com. Le site répertorie les ventes totales de jeux-vidéos pour toutes les principales plateformes, allant des années 70 à aujourd’hui. Le site fournit également des variables additionnelles pour chaque jeu, tel que l’éditeur, le développeur ou bien encore le genre.")
+    st.write("Le jeu de données en question était toutefois quelque peu limité. Le document ayant été créé en 2016, il ne pouvait pas inclure les ventes de jeux sortis plus récemment. La variable développeur manquait également au jeu de données. Nous avons donc fait un travail de recherche supplémentaire pour trouver un scrap plus complet.") 
+    st.write("Nous avons jugé pertinent d’identifier la franchise à laquelle appartiennent les jeux de notre dataset. La franchise en elle-même est un argument marketing de poids et contribue grandement à la communication autour d’un jeu par les éditeurs. Grâce à cette méthode, nous avons ajouté la variable “Franchise” à notre jeu de données qui prend le nom de la franchise, si reconnue.")
+    st.write("Finalement, afin de mieux comprendre les variables importantes de notre dataset, nous avons ajouté une colonne aléatoire contenant des chiffres random.")
     st.dataframe(df.head(10))
     st.write(df.shape)
     st.dataframe(df.describe())
@@ -28,12 +33,13 @@ if page == pages[0] :
         st.dataframe(df.isna().sum())
 
 if page == pages[1] : 
-    st.write("### DataVisualization")
-
+    st.write("### Data Visualisation")
+    st.write("Pour la partie visualisation, nous nous sommes penchés sur les relations entre les variables, notamment le genre du jeu, les publishers, les plateformes et les années. La visualisation était particulièrement centrée sur la compréhension entre le nombre de jeux, les ventes totales par publisher mais aussi quels genres de jeux étaient le plus vendus afin d’avoir un aperçu des forces en présence.")
     
+    st.write("Le premier graphique est l'évolution des ventes totales par année:")
     release_year = df['Year'].value_counts()
     x_values = release_year.values
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10,10))
     sns.lineplot(data = release_year)
     plt.xlabel("Years")
     plt.ylabel("Estimated_Sales")
@@ -43,17 +49,18 @@ if page == pages[1] :
 
 
     
-    
+    st.write("Ce graphique montre les ventes des différents genres de jeu au fil du temps:")
     # Line plot for different sales categories over time
-    fig = plt.figure()
+    fig = plt.figure(figsize=(7,7))
     sns.lineplot(data=df, x='Year', y='Genre', hue='Genre', palette='tab10')
     plt.xlabel('Year')
     plt.ylabel('Ventes (en millions)')
+    plt.legend(bbox_to_anchor=(1.1,1), loc="upper left")
     st.pyplot(fig)
 
 
-
-    fig = plt.figure()
+    st.write("Ici, il s'agit de comprendre quels types de plateforme reviennent le plus dans notre dataset:")
+    fig = plt.figure(figsize=(10,10))
     df_platform2=df["Platform"].value_counts().head(20)
     sns.barplot(y=df_platform2.index, x=df_platform2.values);
     st.pyplot(fig)
@@ -64,8 +71,8 @@ if page == pages[1] :
     by='Estimated_Sales', ascending=False).head(15)
 
     global_sales2["Estimated_Sales"].sort_values(ascending=False).head(10)
-
-    fig = plt.figure()
+    st.write("Enfin, nous avons étudié respectivement la répartition des ventes globales pour les 10 plus grands publishers mondiaux et la répartition selon le nombre de jeux sortis par ces mêmes publishers")
+    fig = plt.figure(figsize=(8,8))
     plt.pie(global_sales2.head(10).Estimated_Sales, labels=["Nintendo", "Activision", "Electronic Arts", "Sony", "EA Sports", "Ubisoft", "THQ", "Sega", "Rockstar Games", "Capcom"],
        colors=["#6c5f32","#f9f4ce","#9fc184","#97c8d9","pink","#432f0f","#a5a202","#0f68b8","#f7e560"], explode=[0.1,0.1,0.1,0,0,0,0,0,0,0],
         autopct=lambda x:round(x,2).astype(str)+"%", pctdistance=0.7, labeldistance=1.1)
@@ -76,7 +83,7 @@ if page == pages[1] :
 
     global_sales2.Name.sort_values(ascending=False).head(10)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10,10))
     plt.pie(global_sales2.Name.sort_values(ascending=False).head(10), labels=["Activision", "Ubisoft", "EA", "Konami", "Nintendo", "THQ", "Sega", "Sony", "EA Sports", "Capcom"],
        colors=["#74e0aa","#bee893","#fbfeb2","#dbbf9e","#c4d9a9","#ddd8c4","#c5a5b8","#cccccc","#bdb3a6","#7c908a"], explode=[0.1,0.1,0.1,0,0,0,0,0,0,0],
         autopct=lambda x:round(x,2).astype(str)+"%", pctdistance=0.7, labeldistance=1.1)
@@ -94,6 +101,11 @@ if page == pages[1] :
 
 if page == pages[2] : 
     st.write("### Modélisation")
+    st.write("Notre problème de machine-learning s’apparente à une régression : prédire un chiffre de ventes à partir de variables catégorielles. Pour y répondre, nous avons entraîné et testé les modèles suivant, en comparant la performance de chacun sur la base du score de train et du score de test :")
+    st.write("-	Régression Linéaire")
+    st.write("-	Arbre de Régression")
+    st.write("-	Random Forest")
+    st.write("Les scores de la régression linéaire et de l'arbre de régression étant trop faibles, nous avons retenu le Random Forest comme modèle le plus adapté à notre objectif.")
 
     # Liste déroulante
     no_model = "Sélectionnez un modèle"
